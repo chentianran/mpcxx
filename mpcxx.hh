@@ -4,8 +4,16 @@
 #include <mpc.h>
 #include <complex>
 
+#ifndef NO_MPREAL
+#include "mpreal.h"
+#endif
+
 class mpcplx
 {
+public:
+
+    mpc_t mpc;
+
 public:
 
     inline static mpc_rnd_t get_default_rnd()    {    return MPC_RNDNN;       }
@@ -35,9 +43,17 @@ public:
     mpcplx (std::complex<double>      z,    mp_prec_t prec = mpcplx::get_default_prec(), mpc_rnd_t mode = mpcplx::get_default_rnd());
     mpcplx (std::complex<long double> z,    mp_prec_t prec = mpcplx::get_default_prec(), mpc_rnd_t mode = mpcplx::get_default_rnd());
 
-protected:
+    /// basic arithmetic with mpcplx ///
+    mpcplx& operator += (const mpcplx& z);
+    mpcplx& operator -= (const mpcplx& z);
+    mpcplx& operator *= (const mpcplx& z);
+    mpcplx& operator /= (const mpcplx& z);
 
-    mpc_t mpc;
+    /// real and imag parts ///
+#ifndef NO_MPREAL
+    mpfr::mpreal real() const;
+    mpfr::mpreal imag() const;
+#endif
 };
 
 // Destructor ///
@@ -104,6 +120,62 @@ inline mpcplx::mpcplx (long double x, long double y, mp_prec_t prec, mpc_rnd_t m
 {
     mpc_init2 (mpc, prec);
     mpc_set_ld_ld (mpc, x, y, mode);
+}
+
+/// real and imag parts ////////////////////////////////////////////////////////
+#ifndef NO_MPREAL
+
+mpfr::mpreal mpcplx::real() const
+{
+    mpfr::mpreal r;
+    mpc_real (r.mp, mpc, (mp_rnd_t)(mpfr_get_default_rounding_mode()));
+    return r;
+}
+
+mpfr::mpreal mpcplx::imag() const
+{
+    mpfr::mpreal r;
+    mpc_imag (r.mp, mpc, (mp_rnd_t)(mpfr_get_default_rounding_mode()));
+    return r;
+}
+
+#endif
+
+/// mpcplx arithmetics /////////////////////////////////////////////////////////
+mpcplx& mpcplx::operator += (const mpcplx& z)
+{
+    mpcplx r;
+
+    mpc_add (r.mpc, mpc, z.mpc, get_default_rnd());
+    *this = r;
+    return *this;
+}
+
+mpcplx& mpcplx::operator -= (const mpcplx& z)
+{
+    mpcplx r;
+
+    mpc_sub (r.mpc, mpc, z.mpc, get_default_rnd());
+    *this = r;
+    return *this;
+}
+
+mpcplx& mpcplx::operator *= (const mpcplx& z)
+{
+    mpcplx r;
+
+    mpc_mul (r.mpc, mpc, z.mpc, get_default_rnd());
+    *this = r;
+    return *this;
+}
+
+mpcplx& mpcplx::operator /= (const mpcplx& z)
+{
+    mpcplx r;
+
+    mpc_div (r.mpc, mpc, z.mpc, get_default_rnd());
+    *this = r;
+    return *this;
 }
 
 
