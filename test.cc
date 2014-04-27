@@ -10,7 +10,7 @@ int main ()
 {
     mpcplx z0;
     mpcplx z1 (z0);
-    mpcplx z  (1);
+    mpcplx z  (10);
     mpcplx zi (2);
     mpcplx zf (3.0f);
     mpcplx zd (4.0);
@@ -31,6 +31,7 @@ int main ()
     z /= zii;
 
     cout << z.real() << " + " << z.imag() << " i" << endl;
+    cout << z << endl;
     return 0;
 }
 

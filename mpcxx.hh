@@ -3,6 +3,7 @@
 
 #include <mpc.h>
 #include <complex>
+#include <iostream>
 
 #ifndef NO_MPREAL
 #include "mpreal.h"
@@ -54,6 +55,9 @@ public:
     mpfr::mpreal real() const;
     mpfr::mpreal imag() const;
 #endif
+
+    /// I/O functions ///
+    std::string to_string (size_t prec, int base = 10, mpc_rnd_t mode = mpcplx::get_default_rnd()) const;
 };
 
 // Destructor ///
@@ -144,38 +148,40 @@ mpfr::mpreal mpcplx::imag() const
 /// mpcplx arithmetics /////////////////////////////////////////////////////////
 mpcplx& mpcplx::operator += (const mpcplx& z)
 {
-    mpcplx r;
-
-    mpc_add (r.mpc, mpc, z.mpc, get_default_rnd());
-    *this = r;
+    mpc_add (mpc, mpc, z.mpc, get_default_rnd());
     return *this;
 }
 
 mpcplx& mpcplx::operator -= (const mpcplx& z)
 {
-    mpcplx r;
-
-    mpc_sub (r.mpc, mpc, z.mpc, get_default_rnd());
-    *this = r;
+    mpc_sub (mpc, mpc, z.mpc, get_default_rnd());
     return *this;
 }
 
 mpcplx& mpcplx::operator *= (const mpcplx& z)
 {
-    mpcplx r;
-
-    mpc_mul (r.mpc, mpc, z.mpc, get_default_rnd());
-    *this = r;
+    mpc_mul (mpc, mpc, z.mpc, get_default_rnd());
     return *this;
 }
 
 mpcplx& mpcplx::operator /= (const mpcplx& z)
 {
-    mpcplx r;
-
-    mpc_div (r.mpc, mpc, z.mpc, get_default_rnd());
-    *this = r;
+    mpc_div (mpc, mpc, z.mpc, get_default_rnd());
     return *this;
+}
+
+/// I/O functions //////////////////////////////////////////////////////////////
+std::string mpcplx::to_string (size_t prec, int base, mpc_rnd_t mode) const
+{
+    char* buf = mpc_get_str (base, prec, mpc, mode);
+    std::string str (buf);
+    mpc_free_str (buf);
+    return str;
+}
+
+inline std::ostream& operator << (std::ostream& os, const mpcplx& z)
+{
+    return os << z.to_string (static_cast<size_t> (os.precision()));
 }
 
 
